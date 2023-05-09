@@ -1,26 +1,22 @@
 import React, { useState, useEffect } from 'react';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 
 
 
 
-function handleOnDelete(id) {
 
-  alert(id);
+// ###################### Rest Service Calling #############################
+function submitDevice(req) {
+  // alert('Calling Insert Service with id' + req.device_id);
 
-
-}
-
-
-function submitDevice(device) {
-  alert('Calling Update Service with id'+device.device_id);
-
-  return fetch('http://localhost:3000/device',{
+  return fetch('http://localhost:3000/device', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify(device)
+    body: JSON.stringify(req)
   })
     .then(response => response.json())
     .catch(error => console.error(error.message));
@@ -32,9 +28,9 @@ function submitDevice(device) {
 
 
 function updateDeviceById(device) {
-  alert('Calling Update Service with id'+device.device_id);
+  // alert('Calling Update Service with id' + device.device_id);
 
-  return fetch('http://localhost:3000/device',{
+  return fetch('http://localhost:3000/device', {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json'
@@ -47,10 +43,26 @@ function updateDeviceById(device) {
 
 
 
-function fetchDeviceById(id) {
-  alert('Calling Service with id'+id);
+function deleteDeviceById(id) {
+  // alert('Calling Delete Service with id' + id);
 
-  return fetch('http://localhost:3000/device/id',{
+  return fetch('http://localhost:3000/device', {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ device_id: id })
+  })
+    .then(response => response.json())
+    .catch(error => console.error(error.message));
+}
+
+
+
+function fetchDeviceById(id) {
+  // alert('Calling Service with id' + id);
+
+  return fetch('http://localhost:3000/device/id', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -69,19 +81,16 @@ function fetchDeviceList() {
 }
 
 
-
+// ###################### Main Render Template #############################
 function DeviceList() {
-   
+
+
+  //Default List Generate
   const [devices, setDevices] = useState([]);
   const [device, setDevice] = useState([]);
   const [showDiv, setShowDiv] = useState(false);
 
   const [value, setValue] = useState('');
-
-  function handleChange(event) {
-    setValue(event.target.value);
-  }
-
   useEffect(() => {
     fetchDeviceList().then(
       data => {
@@ -93,12 +102,70 @@ function DeviceList() {
       });
   }, []);
 
+
+  // ###################### Form Submission #############################
+  function onSubmit(sDevice) {
+    // alert('submit performed with id' + sDevice.device_id + ' with serial num ' + sDevice.device_sl);
+
+
+    if (sDevice.device_id) {
+      // alert('Device has id number UPDATE OPERATION')
+      updateDeviceById(sDevice).then(
+        data=>{
+          // alert(data);
+        }
+      );
+
+    } else {
+      // alert('Device has NO id number INSERT OPERATION - '+sDevice.device_id+'    '+sDevice.device_sl);
+
+      submitDevice(sDevice).then(
+          data=>{
+            // alert(data);
+          }
+      );
+
+    }
+    // window.location.reload();
+  }
+
+
+
+
+
+  // ###################### Handle Action Buttons #############################
+  
+  //form input field handler
+  function handleInputChange(event) {
+    const { name, value } = event.target;
+    setDevice((prevState) => ({
+      ...prevState,
+      [name]: value
+    }));
+  }
+
+  const [startDate, setStartDate] = useState(new Date());
+
+  
+
+  //Delete Button handler
+  function handleOnDelete(id) {
+    // alert('ID requested for delete '+id);
+    deleteDeviceById(id).then(
+      data=>{
+        // alert(data);
+      }
+    );
+    window.location.reload();
+  }
+
+  //Edit Button handler
   function handleOnEdit(id) {
     fetchDeviceById(id).then(
-      data=>{
-        if(data){
+      data => {
+        if (data) {
           setDevice(data);
-        }else{
+        } else {
           setDevice('');
         }
       }
@@ -106,99 +173,105 @@ function DeviceList() {
     setShowDiv(!showDiv);
   }
 
+
+  //Reset Button handler
   const handleButtonClick = () => {
     setShowDiv(showDiv); // toggle the value of showDiv
+    window.location.reload();
   };
 
-  function onSubmit(sDevice){
-    alert('submit performed'+sDevice.device_id);
-
-
-    if(sDevice.device_id){
-      updateDeviceById(sDevice).then(
-        data=>{
-          if(data){
-            setDevice(data);
-          }else{
-            setDevice('');
-          }
-        }
-      );
-
-    }else{
-      submitDevice(sDevice).then(
-        data=>{
-          if(data){
-            setDevice(data);
-          }else{
-            setDevice('');
-          }
-        }
-      );
-
-    }
-    window.location.reload();
-  }
+  
 
   return (
     <div className='container'>
       <h2>Entry</h2>
- 
 
 
+      <div className ='row'>
       <form action='onSubmit'>
-      <table className='table table-responsive'>
-        <th>
-          <td>
-            <label>SL</label>
-            <input className='form-control' type='text' onChange={handleChange} value={device.device_id && device.device_sl||value}/>
-          </td>
-          <td>
-            <label>Name</label>
-            <input className='form-control' type='text' value={device.device_id && device.device_name||value}/>
-          </td>
-          <td>
-            <label>Cat</label>
-            <input className='form-control' type='text' value={device.device_id && device.device_category||value}/>
-          </td>
-          <td>
-            <label>Req</label>
-            <input className='form-control' type='text' value={device.device_id && device.device_req_date||value}/>
-          </td>
-          <td>
-            <label>Remark</label>
-            <input className='form-control' type='text' value={device.device_id && device.remark||value}/>
-          </td>
-          <td>
-            <label>Creator</label>
-            <input className='form-control' type='text' value={device.device_id && device.created_by||value}/>
-          </td>
-        </th>
-        <tr>
-          <td colSpan={6}>
-          {!showDiv && 
-            <div>
-              <button className = 'btn btn-info' onClick={() => onSubmit(device)}>Submit</button>
-              <button className = 'btn btn-danger' disabled>Reset</button>
-        
-            </div>}
-            {showDiv && 
-            <div>
-              <button onClick={() => onSubmit(device)}>Update</button>
-              <button onClick={handleButtonClick}>Reset</button>
-            </div>}
-            
+        <table className='table'>
+          <tr>
+            <td><label htmlFor="device_sl">Device SL:</label></td>
+            <td>
 
+              <input
+                type="text"
+                name="device_sl"
+                value={device.device_sl}
+                onChange={handleInputChange}
+                required
+              />
+            </td>
+            <td><label htmlFor="device_name">Device Name:</label></td>
+            <td>
+              <input
+                type="text"
+                name="device_name"
+                value={device.device_name}
+                onChange={handleInputChange}
+                required
+              />
+            </td>
+            <td><label htmlFor="device_category">Device Category:</label></td>
+            <td>
+              <input
+                type="text"
+                name="device_category"
+                value={device.device_category}
+                onChange={handleInputChange}
+                required
+              />
+            </td>
+          </tr>
+          <tr>
+            <td><label htmlFor="device_req_date">Req Date</label></td>
+            <td>
+              <DatePicker
+                name="device_req_date"
+                value={device.device_req_date}
+                selected={startDate}
+                onChange={date => setStartDate(date)}
+                dateFormat="yyyy-MM-dd"
+                required
+              />
+            </td>
+            <td><label htmlFor="remark">Remark:</label></td>
+            <td>
+              <input name="remark" value={device.remark} onChange={handleInputChange} />
+            </td>
+            <td><label htmlFor="created_by">Created By:</label></td>
+            <td>
+              <input
+                type="text"
+                name="created_by"
+                value={device.created_by}
+                onChange={handleInputChange}
+                required
+              />
+            </td>
+          </tr>
+          <tr>
+            <td colSpan={6}>
+              {!showDiv &&
+                <div>
+                  <button className='btn btn-info' onClick={() => onSubmit(device)}>Submit</button>
 
+                </div>}
+              {showDiv &&
+                <div>
+                  <button className='btn btn-info' onClick={() => onSubmit(device)}>Update</button>
 
-          </td>
-        </tr>
+                </div>}
+            </td>
+          </tr>
         </table>
-        </form>
-
+      </form>
+      </div>
+      <div className='row'><button className='btn btn-danger' onClick={handleButtonClick}>Reset</button></div>
+                
       <h2>List</h2>
-      <table className='table table-responsive'>
-        <thead className='transaction-form-table-header'>
+      <div className='row'>
+      <table className='table'>
           <tr>
             <th>#</th>
             <th>ID</th>
@@ -208,12 +281,8 @@ function DeviceList() {
             <th>Req Date</th>
             <th>Remark</th>
             <th>Status</th>
-            <th>Created At</th>
-            <th>Updated</th>
             <th colSpan={2}>Action</th>
           </tr>
-        </thead>
-        <tbody className='transaction-form-table'>
           {devices && devices.map((row, index) => (
             <tr key={index}>
               <td>{index + 1}</td>
@@ -221,11 +290,9 @@ function DeviceList() {
               <td>{row.device_sl}</td>
               <td>{row.device_name}</td>
               <td>{row.device_category}</td>
-              <td>{row.device_req_date}</td>
+              <td>{new Date(row.device_req_date).toLocaleDateString('en-CA')}</td>
               <td>{row.remark}</td>
               <td>{row.status}</td>
-              <td>{row.created_at}</td>
-              <td>{row.updated_at}</td>
               <td>
                 <button onClick={() => handleOnEdit(row.device_id)}><i className='fa fa-edit'></i></button>
               </td>
@@ -234,9 +301,8 @@ function DeviceList() {
               </td>
             </tr>
           ))}
-        </tbody>
       </table>
-
+      </div>
     </div>
 
   );

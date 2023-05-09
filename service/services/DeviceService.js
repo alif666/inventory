@@ -72,7 +72,7 @@ class DeviceService {
 
     // Update query
     const updateQuery = 'UPDATE device SET device_sl = ?, device_name = ?, device_category = ?, device_req_date = ?, remark = ?, status = ?, updated_at = NOW(), updated_by = ? WHERE device_id = ?';
-
+    deviceObject.device_req_date = new Date().toISOString().slice(0, 10);
     // Execute the update query with the values from the deviceObject
     connection.query(updateQuery, [deviceObject.device_sl, deviceObject.device_name, deviceObject.device_category, deviceObject.device_req_date, deviceObject.remark, 'active',deviceObject.updated_by,deviceObject.device_id], (err, result) => {
       if (err) throw err;
@@ -98,9 +98,10 @@ class DeviceService {
     });
     console.log('DeviceService setDevice called ' + device);
     // Insert query
-    const insertQuery = 'INSERT INTO device (device_sl, device_name, device_category, device_req_date, remark, created_by, updated_by) VALUES (?, ?, ?, ?, ?, ?, ?)';
+    const insertQuery = "INSERT INTO device (device_sl, device_name, device_category, device_req_date, remark, created_by, updated_by) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
     // Execute the insert query with the values from the deviceObject
+    device.device_req_date = new Date().toISOString().slice(0, 10); // get current date in yyyy-MM-dd format
     connection.query(insertQuery, [device.device_sl, device.device_name, device.device_category, device.device_req_date, device.remark, device.created_by, device.updated_by], (err, result) => {
       if (err) throw err;
       console.log('Data inserted successfully:', result);
@@ -141,7 +142,7 @@ getDeviceById(deviceObject, callback) {
     deviceObject = Device.mapFromRow(result[0]);
 
     console.log("Device Service - Get By Id - " + deviceObject);
-
+    deviceObject.device_req_date = new Date().toISOString().slice(0, 10);
     // Call the callback function with the mapped Device objects
     callback(deviceObject);
 

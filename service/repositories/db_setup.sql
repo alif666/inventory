@@ -26,3 +26,12 @@ CREATE TABLE IF NOT EXISTS person (
   updated_by VARCHAR(255) NOT NULL
 );
 
+ALTER TABLE `devicedb`.`device` 
+CHANGE COLUMN `device_name` `device_name` VARCHAR(255) NULL ,
+CHANGE COLUMN `device_category` `device_category` VARCHAR(255) NULL ,
+CHANGE COLUMN `device_req_date` `device_req_date` DATE NULL ,
+CHANGE COLUMN `remark` `remark` VARCHAR(255) NULL ,
+CHANGE COLUMN `created_by` `created_by` VARCHAR(255) NULL ,
+CHANGE COLUMN `updated_by` `updated_by` VARCHAR(255) NULL ,
+ADD UNIQUE INDEX `device_sl_UNIQUE` (`device_sl` ASC) VISIBLE;
+;
